@@ -1,17 +1,29 @@
-from domain.Borrow import Borrow
-from domain.Rental import Rental 
 from repository.BorrowRepository import BorrowRepository
 from repository.DvdRepository import DvdRepository
-from domain.Dvd import Dvd
 from controller.Controller import Controller
 from ui.UI import UI
 
+
 def main():
-    BorrowRepo = BorrowRepository("borrow.txt")
-    DvdRepo = DvdRepository("dvd.txt")
+    borrow_repo = BorrowRepository("borrow.txt")
+    dvd_repo = DvdRepository("dvd.txt")
     
-    ctrl = Controller(BorrowRepo,DvdRepo) 
-    ui = UI(ctrl)
-    ui.run()
+    ctrl = Controller(borrow_repo, dvd_repo)
     
-main()
+    print("\nSelect interface:")
+    print("1. Command Line Interface")
+    print("2. Graphical User Interface")
+    
+    choice = input("Enter choice (1 or 2): ").strip()
+    
+    if choice == "2":
+        from ui.GraphicalUI import MovieRentalGUI
+        gui = MovieRentalGUI(ctrl)
+        gui.run()
+    else:
+        ui = UI(ctrl)
+        ui.run()
+
+
+if __name__ == "__main__":
+    main()

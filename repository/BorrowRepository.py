@@ -65,9 +65,11 @@ class BorrowRepository():
         info = f.readline()
         j = 0
         while info:
-            borrow_info = info.split(";;")
-            if len(borrow_info) == 3:
-                borrow = Borrow(int(borrow_info[0]), int(borrow_info[1]), borrow_info[2])
+            borrow_info = info.strip().split(";;")
+            if len(borrow_info) >= 3:
+                rented_date = borrow_info[3] if len(borrow_info) > 3 else ""
+                return_date = borrow_info[4] if len(borrow_info) > 4 else ""
+                borrow = Borrow(int(borrow_info[0]), int(borrow_info[1]), borrow_info[2], rented_date, return_date)
                 self.add_without_writing(borrow)
                 info = f.readline()
             else:
@@ -80,9 +82,11 @@ class BorrowRepository():
         f.close()
         
     def __write_file(self):
-        f = open(self.__file_name,"w")
+        f = open(self.__file_name, "w")
         for borrow in self.__borrows:
-            f.write(str(borrow.get_id()) + ";;" + str(borrow.get_id_dvd()) + ";;" + borrow.get_name_client() + "\n")
+            f.write(str(borrow.get_id()) + ";;" + str(borrow.get_id_dvd()) + ";;" + 
+                    borrow.get_name_client() + ";;" + borrow.get_rented_date() + ";;" + 
+                    borrow.get_return_date() + "\n")
         f.close()
         
         

@@ -21,8 +21,14 @@ class DvdRepository():
         if self.find(dvd.get_id_dvd()) == -1:
             self.__dValidator.validate(dvd)
             self.__dvds.append(dvd)
+            self.__write_file()
         else:
             raise DuplicateException()
+    
+    def __write_file(self):
+        with open(self.__file_name, "w") as f:
+            for dvd in self.__dvds:
+                f.write(str(dvd.get_id_dvd()) + ";;" + dvd.get_name() + "\n")
     
         
     def remove(self, id):
@@ -57,10 +63,10 @@ class DvdRepository():
         info = f.readline()
         j = 0
         while info:
-            dvd_info = info.split(";;")
+            dvd_info = info.strip().split(";;")
             if len(dvd_info) == 2:
-                dvd = Dvd(int(dvd_info[0]), dvd_info[1])
-                self.add(dvd)
+                dvd = Dvd(int(dvd_info[0]), dvd_info[1].strip())
+                self.add_without_writing(dvd)
                 info = f.readline()
             else:
                 info = f.readline()
@@ -70,6 +76,13 @@ class DvdRepository():
             print(str(j) + " lines have been corrupted in your file.\n")
         print("Dvds have been successfully loaded in the system.\n")
         f.close()
+    
+    def add_without_writing(self, dvd):
+        if self.find(dvd.get_id_dvd()) == -1:
+            self.__dValidator.validate(dvd)
+            self.__dvds.append(dvd)
+        else:
+            raise DuplicateException()
         
         
     

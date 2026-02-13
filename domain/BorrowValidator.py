@@ -1,6 +1,5 @@
 from domain.Borrow import Borrow
 from domain.Errors import InvalidClassException
-from _overlapped import NULL
 
 
 class BorrowValidator():

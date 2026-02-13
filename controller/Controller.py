@@ -16,11 +16,44 @@ class Controller():
         rentals = []
         
         for i in self.__borepo.get_all():
-            r = Rental(i.get_id(), self.__dvdrepo.get_all()[self.__dvdrepo.find(i.get_id_dvd())].get_name(), i.get_name_client()) 
-            rentals.append(r)
+            dvd_idx = self.__dvdrepo.find(i.get_id_dvd())
+            if dvd_idx != -1:
+                dvd_name = self.__dvdrepo.get_all()[dvd_idx].get_name()
+                r = Rental(i.get_id(), dvd_name, i.get_name_client(), 
+                          i.get_rented_date(), i.get_return_date())
+                rentals.append(r)
 
-        rentals = sorted(rentals, key = lambda x: x.dvd_name)    
-        return rentals 
+        rentals = sorted(rentals, key=lambda x: x.dvd_name)    
+        return rentals
+    
+    def get_dvds_with_status(self):
+        result = []
+        borrowed_dvds = {}
+        for b in self.__borepo.get_all():
+            borrowed_dvds[b.get_id_dvd()] = b
+        
+        for dvd in self.__dvdrepo.get_all():
+            dvd_id = dvd.get_id_dvd()
+            if dvd_id in borrowed_dvds:
+                borrow = borrowed_dvds[dvd_id]
+                result.append({
+                    'id': dvd_id,
+                    'name': dvd.get_name(),
+                    'client': borrow.get_name_client(),
+                    'rented_date': borrow.get_rented_date(),
+                    'return_date': borrow.get_return_date(),
+                    'status': 'Rented'
+                })
+            else:
+                result.append({
+                    'id': dvd_id,
+                    'name': dvd.get_name(),
+                    'client': '',
+                    'rented_date': '',
+                    'return_date': '',
+                    'status': 'Available'
+                })
+        return result 
     
     def filter_dvds_name(self, filterString):
         filteredList = []
@@ -36,14 +69,14 @@ class Controller():
         return idsList
         
                    
-    def add_new_borrow(self, name, dvd_id):
+    def add_new_borrow(self, name, dvd_id, rented_date=None, return_date=None):
         rand_ids = self.__get_all_borrow_ids()
-        id = randint(0, len(rand_ids)*10)  
-        while(id in rand_ids):
-            id = randint(0, len(rand_ids)*10)
-        if str(dvd_id) in str(self.__get_all_dvds_ids()):
-            if not(str(dvd_id) in str(self.__get_all_dvds_ids_from_borrows())): 
-                b = Borrow(int(id), int(dvd_id), name)
+        id = randint(0, max(len(rand_ids)*10, 100))
+        while id in rand_ids:
+            id = randint(0, max(len(rand_ids)*10, 100))
+        if int(dvd_id) in self.__get_all_dvds_ids():
+            if int(dvd_id) not in self.__get_all_dvds_ids_from_borrows():
+                b = Borrow(int(id), int(dvd_id), name, rented_date, return_date)
                 self.__borepo.add(b)
             else:
                 raise AlreadyBurrowed()
@@ -64,7 +97,14 @@ class Controller():
         dvdIds = []
         for i in self.__dvdrepo.get_all():
             dvdIds.append(i.get_id_dvd())
-        return dvdIds       
+        return dvdIds
+    
+    def add_new_dvd(self, dvd_id, name):
+        dvd = Dvd(int(dvd_id), name)
+        self.__dvdrepo.add(dvd)
+    
+    def get_all_dvds(self):
+        return self.__dvdrepo.get_all()
         
         
     
